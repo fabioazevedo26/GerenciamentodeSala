@@ -5,7 +5,7 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import { LogOut, Calendar as CalendarIcon, Settings, Users, Home, X, Plus } from 'lucide-react';
+import { LogOut, Calendar as CalendarIcon, Settings, Users, Home, X, Plus, Trash2, Edit2 } from 'lucide-react';
 
 export default function Dashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -18,6 +18,7 @@ export default function Dashboard() {
   // Modals State
   const [isRoomModalOpen, setIsRoomModalOpen] = useState(false);
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<any>(null);
 
   // Data State (Mock)
   const [rooms, setRooms] = useState([
@@ -27,13 +28,13 @@ export default function Dashboard() {
   ]);
 
   const [users, setUsers] = useState([
-    { id: 1, name: 'Administrador', username: 'admin', role: 'ADMIN' },
-    { id: 2, name: 'João Silva', username: 'joao.silva', role: 'USER' },
+    { id: 1, name: 'Administrador', username: 'admin', role: 'ADMIN', password: 'admin' },
+    { id: 2, name: 'João Silva', username: 'joao.silva', role: 'USER', password: '123' },
   ]);
 
   // Form states for adding
   const [newRoom, setNewRoom] = useState({ name: '', cap: '', res: '' });
-  const [newUser, setNewUser] = useState({ name: '', username: '', role: 'USER' });
+  const [newUser, setNewUser] = useState({ name: '', username: '', role: 'USER', password: '' });
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,12 +54,31 @@ export default function Dashboard() {
     }
   };
 
-  const handleAddUser = (e: React.FormEvent) => {
+  const handleSaveUser = (e: React.FormEvent) => {
     e.preventDefault();
     if (newUser.name && newUser.username) {
-      setUsers([...users, { id: Date.now(), name: newUser.name, username: newUser.username, role: newUser.role }]);
+      if (editingUser) {
+        // Edit mode
+        setUsers(users.map(u => u.id === editingUser.id ? { ...u, ...newUser } : u));
+      } else {
+        // Add mode
+        setUsers([...users, { id: Date.now(), ...newUser }]);
+      }
       setIsUserModalOpen(false);
-      setNewUser({ name: '', username: '', role: 'USER' });
+      setEditingUser(null);
+      setNewUser({ name: '', username: '', role: 'USER', password: '' });
+    }
+  };
+
+  const handleEditUser = (user: any) => {
+    setEditingUser(user);
+    setNewUser({ name: user.name, username: user.username, role: user.role, password: user.password || '' });
+    setIsUserModalOpen(true);
+  };
+
+  const handleDeleteUser = (id: number) => {
+    if (confirm('Tem certeza que deseja excluir este usuário?')) {
+      setUsers(users.filter(u => u.id !== id));
     }
   };
 
@@ -256,7 +276,11 @@ export default function Dashboard() {
                   <p className="text-zinc-400">Controle de acesso e permissões.</p>
                 </div>
                 <button 
-                  onClick={() => setIsUserModalOpen(true)}
+                  onClick={() => {
+                    setEditingUser(null);
+                    setNewUser({ name: '', username: '', role: 'USER', password: '' });
+                    setIsUserModalOpen(true);
+                  }}
                   className="flex items-center gap-2 bg-primary hover:bg-primary/80 text-primary-foreground px-6 py-2.5 rounded-lg font-medium transition-all shadow-[0_0_15px_rgba(59,130,246,0.4)]"
                 >
                   <Plus size={18} /> Novo Usuário
@@ -275,7 +299,7 @@ export default function Dashboard() {
                   </thead>
                   <tbody>
                     {users.map(user => (
-                      <tr key={user.id} className="border-b border-white/5">
+                      <tr key={user.id} className="border-b border-white/5 group hover:bg-white/5 transition-colors">
                         <td className="p-4">{user.name}</td>
                         <td className="p-4">{user.username}</td>
                         <td className="p-4">
@@ -284,12 +308,22 @@ export default function Dashboard() {
                           </span>
                         </td>
                         <td className="p-4">
-                          <button 
-                            className="text-blue-400 hover:text-blue-300 mr-3"
-                            onClick={() => alert(`Editar usuário: ${user.name} não implementado no mock`)}
-                          >
-                            Editar
-                          </button>
+                          <div className="flex gap-2">
+                            <button 
+                              className="p-2 text-blue-400 hover:bg-blue-400/10 rounded-lg transition-colors"
+                              onClick={() => handleEditUser(user)}
+                              title="Editar"
+                            >
+                              <Edit2 size={18} />
+                            </button>
+                            <button 
+                              className="p-2 text-red-400 hover:bg-red-400/10 rounded-lg transition-colors"
+                              onClick={() => handleDeleteUser(user.id)}
+                              title="Excluir"
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -334,11 +368,14 @@ export default function Dashboard() {
       {isUserModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animation-fade-in">
           <div className="glass-panel w-full max-w-md p-6 rounded-2xl border border-white/10 shadow-2xl relative">
-            <button onClick={() => setIsUserModalOpen(false)} className="absolute top-4 right-4 text-zinc-400 hover:text-white">
+            <button onClick={() => {
+              setIsUserModalOpen(false);
+              setEditingUser(null);
+            }} className="absolute top-4 right-4 text-zinc-400 hover:text-white">
               <X size={20} />
             </button>
-            <h3 className="text-xl font-bold mb-6">Novo Usuário</h3>
-            <form onSubmit={handleAddUser} className="space-y-4">
+            <h3 className="text-xl font-bold mb-6">{editingUser ? 'Editar Usuário' : 'Novo Usuário'}</h3>
+            <form onSubmit={handleSaveUser} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-zinc-300 mb-1">Nome Completo</label>
                 <input type="text" required value={newUser.name} onChange={e => setNewUser({...newUser, name: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-primary/50" />
@@ -348,6 +385,10 @@ export default function Dashboard() {
                 <input type="text" required value={newUser.username} onChange={e => setNewUser({...newUser, username: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-primary/50" />
               </div>
               <div>
+                <label className="block text-sm font-medium text-zinc-300 mb-1">Senha</label>
+                <input type="password" required={!editingUser} value={newUser.password} onChange={e => setNewUser({...newUser, password: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-primary/50" placeholder={editingUser ? 'Deixe em branco para manter' : 'Digite a senha'} />
+              </div>
+              <div>
                 <label className="block text-sm font-medium text-zinc-300 mb-1">Nível de Acesso</label>
                 <select value={newUser.role} onChange={e => setNewUser({...newUser, role: e.target.value})} className="w-full bg-[#1A1A1A] border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-primary/50 appearance-none">
                   <option value="USER">Usuário Comum</option>
@@ -355,8 +396,13 @@ export default function Dashboard() {
                 </select>
               </div>
               <div className="pt-4 flex justify-end gap-3">
-                <button type="button" onClick={() => setIsUserModalOpen(false)} className="px-4 py-2 text-zinc-400 hover:text-white">Cancelar</button>
-                <button type="submit" className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-lg font-medium">Salvar Usuário</button>
+                <button type="button" onClick={() => {
+                  setIsUserModalOpen(false);
+                  setEditingUser(null);
+                }} className="px-4 py-2 text-zinc-400 hover:text-white">Cancelar</button>
+                <button type="submit" className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-lg font-medium">
+                  {editingUser ? 'Salvar Alterações' : 'Criar Usuário'}
+                </button>
               </div>
             </form>
           </div>
