@@ -26,11 +26,12 @@ model Room {
 }
 
 model Booking {
-  id         Int      @id @default(autoincrement())
+  id         Int           @id @default(autoincrement())
   title      String?
   start_time DateTime
   end_time   DateTime
-  created_at DateTime @default(now())
+  status     BookingStatus @default(PENDING)
+  created_at DateTime      @default(now())
   
   user       User     @relation(fields: [user_id], references: [id])
   user_id    Int
@@ -47,4 +48,10 @@ model Setting {
 enum Role {
   USER
   ADMIN
+}
+
+enum BookingStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
