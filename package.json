@@ -1,0 +1,13 @@
+{
+  "name": "gestao-salas",
+  "version": "1.0.0",
+  "description": "Sistema Moderno de Gestão de Reservas",
+  "scripts": {
+    "dev:api": "npm run start:dev --prefix apps/api",
+    "dev:web": "npm run dev --prefix apps/web",
+    "dev": "npx concurrently \"npm run dev:api\" \"npm run dev:web\""
+  },
+  "dependencies": {
+    "concurrently": "^8.0.0"
+  }
+}

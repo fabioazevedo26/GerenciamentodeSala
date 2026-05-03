@@ -1,0 +1,1 @@
+-- Arquivo de inicialização do banco de dados (esquema será gerenciado pelo Prisma)
