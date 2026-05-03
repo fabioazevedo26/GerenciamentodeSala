@@ -22,6 +22,18 @@ export class RoomController {
     });
   }
 
+  @Put(':id')
+  async update(@Param('id') id: string, @Body() data: any) {
+    return this.prisma.room.update({
+      where: { id: Number(id) },
+      data: {
+        name: data.name,
+        capacity: Number(data.capacity),
+        description: data.res,
+      },
+    });
+  }
+
   @Delete(':id')
   async remove(@Param('id') id: string) {
     return this.prisma.room.delete({
