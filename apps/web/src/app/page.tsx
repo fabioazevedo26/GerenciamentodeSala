@@ -12,6 +12,7 @@ const API_URL = 'http://localhost:3001';
 
 export default function Dashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
   const [activeTab, setActiveTab] = useState('calendar');
   
   // Login State
@@ -57,13 +58,17 @@ export default function Dashboard() {
     }
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Simples login mockado por enquanto, mas persistência de dados está ativa
-    if (username === 'admin' && password === 'admin') {
+    try {
+      const response = await axios.post(`${API_URL}/users/login`, {
+        username,
+        password
+      });
+      setCurrentUser(response.data);
       setIsAuthenticated(true);
-    } else {
-      alert('Credenciais inválidas! (Use admin / admin para testar)');
+    } catch (error) {
+      alert('Usuário ou senha inválidos!');
     }
   };
 
@@ -110,7 +115,7 @@ export default function Dashboard() {
       name: user.name, 
       username: user.username, 
       role: user.role, 
-      password: '' // Não mostramos o hash da senha por segurança
+      password: '' 
     });
     setIsUserModalOpen(true);
   };
@@ -179,6 +184,10 @@ export default function Dashboard() {
           </nav>
         </div>
         <div>
+          <div className="mb-4 px-4 py-2 bg-white/5 rounded-lg border border-white/10">
+            <p className="text-xs text-zinc-500 uppercase">Logado como</p>
+            <p className="text-sm font-medium text-white truncate">{currentUser?.name}</p>
+          </div>
           <button onClick={() => setIsAuthenticated(false)} className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-all border border-transparent hover:border-red-500/20">
             <LogOut size={18} /><span className="font-medium">Sair</span>
           </button>
@@ -211,7 +220,7 @@ export default function Dashboard() {
                     initialView="timeGridWeek"
                     headerToolbar={{ left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay' }}
                     slotMinTime="07:00:00" slotMaxTime="22:00:00" allDaySlot={false} selectable={true} selectMirror={true} nowIndicator={true} editable={true}
-                    events={[]} // Faremos a integração das reservas em breve
+                    events={[]} 
                     select={(info) => { alert(`Nova reserva de: ${info.startStr} até ${info.endStr}`); }}
                     height="100%" locale="pt-br" buttonText={{ today: 'Hoje', month: 'Mês', week: 'Semana', day: 'Dia' }}
                   />

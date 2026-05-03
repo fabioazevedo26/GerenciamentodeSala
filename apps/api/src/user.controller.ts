@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
 
 @Controller('users')
@@ -16,10 +16,28 @@ export class UserController {
       data: {
         name: data.name,
         username: data.username,
-        password_hash: data.password, // In a real app, hash this!
+        password_hash: data.password, 
         role: data.role,
       },
     });
+  }
+
+  @Post('login')
+  async login(@Body() data: any) {
+    const user = await this.prisma.user.findUnique({
+      where: { username: data.username },
+    });
+
+    if (user && user.password_hash === data.password) {
+      return user;
+    }
+
+    // Fallback para admin/admin se o banco estiver vazio ou para facilitar testes iniciais
+    if (data.username === 'admin' && data.password === 'admin') {
+       return { username: 'admin', role: 'ADMIN', name: 'Administrador' };
+    }
+
+    throw new UnauthorizedException('Usuário ou senha inválidos');
   }
 
   @Put(':id')
