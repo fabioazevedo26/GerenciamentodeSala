@@ -36,9 +36,12 @@ export default function Dashboard() {
   useEffect(() => {
     if (isAuthenticated) {
       fetchRooms();
-      fetchUsers();
+      // Only fetch users if current user is ADMIN
+      if (currentUser?.role === 'ADMIN') {
+        fetchUsers();
+      }
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, currentUser]);
 
   const fetchRooms = async () => {
     try {
@@ -67,6 +70,7 @@ export default function Dashboard() {
       });
       setCurrentUser(response.data);
       setIsAuthenticated(true);
+      setActiveTab('calendar'); // Reset to calendar on login
     } catch (error) {
       alert('Usuário ou senha inválidos!');
     }
@@ -175,18 +179,27 @@ export default function Dashboard() {
             <button onClick={() => setActiveTab('calendar')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${activeTab === 'calendar' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-zinc-400 hover:text-white hover:bg-white/5'}`}>
               <Home size={18} /><span className="font-medium">Painel de Reservas</span>
             </button>
-            <button onClick={() => setActiveTab('rooms')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${activeTab === 'rooms' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-zinc-400 hover:text-white hover:bg-white/5'}`}>
-              <Settings size={18} /><span className="font-medium">Salas</span>
-            </button>
-            <button onClick={() => setActiveTab('users')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${activeTab === 'users' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-zinc-400 hover:text-white hover:bg-white/5'}`}>
-              <Users size={18} /><span className="font-medium">Usuários</span>
-            </button>
+            
+            {/* Abas restritas a ADMIN */}
+            {currentUser?.role === 'ADMIN' && (
+              <>
+                <button onClick={() => setActiveTab('rooms')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${activeTab === 'rooms' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-zinc-400 hover:text-white hover:bg-white/5'}`}>
+                  <Settings size={18} /><span className="font-medium">Salas</span>
+                </button>
+                <button onClick={() => setActiveTab('users')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${activeTab === 'users' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-zinc-400 hover:text-white hover:bg-white/5'}`}>
+                  <Users size={18} /><span className="font-medium">Usuários</span>
+                </button>
+              </>
+            )}
           </nav>
         </div>
         <div>
-          <div className="mb-4 px-4 py-2 bg-white/5 rounded-lg border border-white/10">
-            <p className="text-xs text-zinc-500 uppercase">Logado como</p>
-            <p className="text-sm font-medium text-white truncate">{currentUser?.name}</p>
+          <div className="mb-4 px-4 py-2 bg-white/5 rounded-lg border border-white/10 text-center">
+            <p className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Logado como</p>
+            <p className="text-sm font-bold text-white truncate">{currentUser?.name}</p>
+            <span className="inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-primary/10 text-primary border border-primary/20">
+              {currentUser?.role}
+            </span>
           </div>
           <button onClick={() => setIsAuthenticated(false)} className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-all border border-transparent hover:border-red-500/20">
             <LogOut size={18} /><span className="font-medium">Sair</span>
@@ -229,7 +242,7 @@ export default function Dashboard() {
             </div>
           )}
           
-          {activeTab === 'rooms' && (
+          {(activeTab === 'rooms' && currentUser?.role === 'ADMIN') && (
             <div className="h-full animation-fade-in">
               <header className="mb-8 flex justify-between items-center">
                 <div>
@@ -255,7 +268,7 @@ export default function Dashboard() {
             </div>
           )}
 
-          {activeTab === 'users' && (
+          {(activeTab === 'users' && currentUser?.role === 'ADMIN') && (
             <div className="h-full animation-fade-in">
                <header className="mb-8 flex justify-between items-center">
                 <div><h2 className="text-3xl font-bold mb-2">Gerenciar Usuários</h2><p className="text-zinc-400">Controle de acesso e permissões.</p></div>
@@ -288,8 +301,8 @@ export default function Dashboard() {
         </div>
       </main>
 
-      {/* Modals */}
-      {isRoomModalOpen && (
+      {/* Modals (Apenas visíveis se ADMIN) */}
+      {isRoomModalOpen && currentUser?.role === 'ADMIN' && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animation-fade-in">
           <div className="glass-panel w-full max-w-md p-6 rounded-2xl border border-white/10 shadow-2xl relative">
             <button onClick={() => setIsRoomModalOpen(false)} className="absolute top-4 right-4 text-zinc-400 hover:text-white"><X size={20} /></button>
@@ -304,7 +317,7 @@ export default function Dashboard() {
         </div>
       )}
 
-      {isUserModalOpen && (
+      {isUserModalOpen && currentUser?.role === 'ADMIN' && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animation-fade-in">
           <div className="glass-panel w-full max-w-md p-6 rounded-2xl border border-white/10 shadow-2xl relative">
             <button onClick={() => { setIsUserModalOpen(false); setEditingUser(null); }} className="absolute top-4 right-4 text-zinc-400 hover:text-white"><X size={20} /></button>
