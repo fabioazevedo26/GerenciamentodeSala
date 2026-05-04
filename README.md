@@ -2,102 +2,106 @@
 
 O **SMGR** é uma plataforma de gerenciamento de salas e recursos on-premises, focada em minimalismo, fluidez e alta usabilidade. Desenvolvido com uma estética contemporânea "Bio-Tech", o sistema substitui modelos obsoletos por uma interface de alto desempenho e navegação instantânea.
 
-Telas
-<img width="1917" height="943" alt="image" src="https://github.com/user-attachments/assets/fdbb76e6-cde2-4d7c-b02f-92e2320abdf1" />
+## 📸 Demonstração do Sistema
 
+<img width="1917" height="943" alt="Login" src="https://github.com/user-attachments/assets/fdbb76e6-cde2-4d7c-b02f-92e2320abdf1" />
 
-<img width="1919" height="941" alt="image" src="https://github.com/user-attachments/assets/e131f0ba-ad18-4773-8fff-fbef1bef8e99" />
+<img width="1919" height="941" alt="Dashboard" src="https://github.com/user-attachments/assets/e131f0ba-ad18-4773-8fff-fbef1bef8e99" />
 
+<img width="1919" height="943" alt="Salas" src="https://github.com/user-attachments/assets/dae9277b-3d99-4da5-ae63-72d5977d6820" />
 
+<img width="1919" height="945" alt="Usuarios" src="https://github.com/user-attachments/assets/d7f17de7-1197-425e-9cd2-382c39e3398d" />
 
-<img width="1919" height="943" alt="image" src="https://github.com/user-attachments/assets/dae9277b-3d99-4da5-ae63-72d5977d6820" />
+<img width="1919" height="943" alt="Historico" src="https://github.com/user-attachments/assets/f00026f3-f5ad-4785-b336-3e5282bd1afc" />
 
-
-
-<img width="1919" height="945" alt="image" src="https://github.com/user-attachments/assets/d7f17de7-1197-425e-9cd2-382c39e3398d" />
-
-
-
-<img width="1919" height="943" alt="image" src="https://github.com/user-attachments/assets/f00026f3-f5ad-4785-b336-3e5282bd1afc" />
-
-
+---
 
 ## 🚀 Tecnologias Utilizadas
 
 ### Frontend
-- **Next.js (React)**: Framework para a interface rápida e moderna.
-- **Tailwind CSS v4**: Estilização de última geração com alta performance.
-- **FullCalendar**: Grade de agendamento interativa com suporte a "arrastar e soltar".
-- **Lucide React**: Biblioteca de ícones minimalistas.
+- **Next.js (React)**: Interface ultra-rápida com renderização otimizada.
+- **Tailwind CSS v4**: Estilização moderna e responsiva.
+- **FullCalendar**: Grade de agendamento interativa.
+- **Lucide React**: Ícones minimalistas e consistentes.
 
 ### Backend
-- **NestJS (Node.js)**: "Cérebro" da aplicação, robusto e escalável.
-- **Prisma ORM**: Gerenciamento de banco de dados simplificado e tipado.
-- **PostgreSQL**: Banco de dados relacional de alta confiabilidade.
+- **NestJS (Node.js)**: API escalável e modular.
+- **Prisma ORM**: Modelagem de dados segura e tipada.
+- **PostgreSQL**: Banco de dados robusto e confiável.
 
 ### Infraestrutura
-- **Docker**: Containerização para facilitar o deploy e a execução local.
+- **Docker**: Containerização completa do ambiente de dados.
+
+---
 
 ## ✨ Funcionalidades Principais
 
-- **Autenticação Restrita**: Tela de login moderna para acesso seguro.
-  - *Credenciais Padrão (Teste):* Usuário: `admin` | Senha: `admin`
-- **Agenda Interativa**: Visualização dinâmica de horários e reservas.
-- **Gestão de Salas**: Cadastro e visualização de salas, capacidades e recursos.
-- **Gestão de Usuários**: Painel administrativo para controle de acessos e permissões.
-- **Design Bio-Tech**: Interface Dark Mode premium com micro-animações e foco na tarefa.
+- **🛡️ Setup Inicial**: Ao rodar o sistema pela primeira vez, ele detecta a ausência de administradores e solicita a configuração do usuário principal.
+- **📅 Painel de Reservas**: Visualização semanal/mensal com suporte a arrastar e soltar.
+- **⏱️ Reserva Manual**: Opção de inserir data e hora manualmente para reservas de longa duração.
+- **✅ Fluxo de Aprovação**: Usuários solicitam reservas que ficam pendentes até que um administrador as aprove.
+- **🏢 Gestão de Salas**: CRUD completo de salas com capacidade e recursos.
+- **👥 Gestão de Usuários**: Controle de permissões (ADMIN/USER).
+- **📜 Histórico Completo**: Registro auditável de todas as solicitações, aprovações e rejeições.
 
-## 📦 Como Instalar e Rodar
+---
 
-Siga os passos abaixo para colocar o sistema de pé no seu ambiente local:
+## 📦 Como Instalar e Rodar (Passo a Passo)
+
+Siga estas instruções para rodar o SMGR do zero no seu computador:
 
 ### 1. Pré-requisitos
-Certifique-se de ter instalado em sua máquina:
-- [Node.js](https://nodejs.org/) (versão 18 ou superior)
-- [Docker](https://www.docker.com/) e Docker Compose
+- [Node.js](https://nodejs.org/) (v18 ou superior)
+- [Docker Desktop](https://www.docker.com/) instalado e rodando.
 
-### 2. Clonar o Repositório
+### 2. Clonar e Instalar
 ```bash
-git clone <url-do-seu-repositorio>
-cd "gerenciador de salas"
+# Clone o repositório
+git clone https://github.com/fabioazevedo26/GerenciamentodeSala.git
+cd GerenciamentodeSala
+
+# Instale as dependências na raiz
+npm install
 ```
 
-### 3. Configurar o Banco de Dados
-Acesse a pasta docker e inicie o PostgreSQL:
+### 3. Iniciar o Banco de Dados (Docker)
 ```bash
+# Vá para a pasta docker e suba o PostgreSQL
 cd docker
 docker-compose up -d
 cd ..
 ```
 
-### 4. Instalar Dependências
-Instale as dependências na raiz do projeto:
-```bash
-npm install
-```
-*O script de instalação também deve ser executado dentro de `apps/web` e `apps/api` se não houver um workspace configurado.*
-
-### 5. Configurar o Backend (Prisma)
-Dentro da pasta `apps/api`, sincronize o banco de dados:
+### 4. Configurar o Backend e Prisma
+É necessário sincronizar o banco com o código:
 ```bash
 cd apps/api
+
+# Cria as tabelas no banco
 npx prisma db push
-cd ../..
+
+# Gera o cliente do Prisma
+npx prisma generate
+
+cd ..
 ```
 
-### 6. Executar o Projeto
-Na raiz do projeto, inicie o Frontend e o Backend simultaneamente:
+### 5. Executar o Projeto
+Na pasta raiz (GerenciamentodeSala), execute:
 ```bash
 npm run dev
 ```
 
-O sistema estará disponível nos seguintes endereços:
-- **Frontend**: [http://localhost:3000](http://localhost:3000)
-- **Backend (API)**: [http://localhost:3001](http://localhost:3001)
+### 6. Primeiro Acesso
+- Abra seu navegador em: **[http://localhost:3000](http://localhost:3000)**
+- O sistema detectará que é o primeiro acesso.
+- **Configure seu usuário Administrador** e pronto! O sistema está liberado para uso.
 
-## 🛠️ Estrutura de Pastas
+---
+
+## 🛠️ Estrutura do Projeto
 ```text
-/gestao-salas
+/gerenciador de salas
 ├── /apps
 │   ├── /web (Frontend - Next.js)
 │   └── /api (Backend - NestJS)
@@ -108,4 +112,4 @@ O sistema estará disponível nos seguintes endereços:
 ```
 
 ---
-Desenvolvido por **Fabio**.
+Desenvolvido com ❤️ por **Fabio**.
