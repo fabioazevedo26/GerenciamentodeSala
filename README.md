@@ -4,9 +4,17 @@ O **SMGR** é uma plataforma de gerenciamento de salas e recursos on-premises, f
 
 Telas
 <img width="1917" height="943" alt="image" src="https://github.com/user-attachments/assets/fdbb76e6-cde2-4d7c-b02f-92e2320abdf1" />
+
+
 <img width="1919" height="941" alt="image" src="https://github.com/user-attachments/assets/e131f0ba-ad18-4773-8fff-fbef1bef8e99" />
+
+
 <img width="1919" height="943" alt="image" src="https://github.com/user-attachments/assets/dae9277b-3d99-4da5-ae63-72d5977d6820" />
+
+
 <img width="1919" height="945" alt="image" src="https://github.com/user-attachments/assets/d7f17de7-1197-425e-9cd2-382c39e3398d" />
+
+
 <img width="1919" height="943" alt="image" src="https://github.com/user-attachments/assets/f00026f3-f5ad-4785-b336-3e5282bd1afc" />
 
 
