@@ -76,8 +76,8 @@ export default function Dashboard() {
           bgColor = 'rgba(234, 179, 8, 0.2)';
           borderColor = 'rgb(234, 179, 8)';
         } else if (b.status === 'APPROVED') {
-          bgColor = b.userId === currentUser?.id ? 'rgba(59, 130, 246, 0.2)' : 'rgba(34, 197, 94, 0.2)';
-          borderColor = b.userId === currentUser?.id ? 'rgb(59, 130, 246)' : 'rgb(34, 197, 94)';
+          bgColor = b.user_id === currentUser?.id ? 'rgba(59, 130, 246, 0.2)' : 'rgba(34, 197, 94, 0.2)';
+          borderColor = b.user_id === currentUser?.id ? 'rgb(59, 130, 246)' : 'rgb(34, 197, 94)';
         }
 
         return {
@@ -112,10 +112,28 @@ export default function Dashboard() {
   };
 
   const handleSelectTime = (info: any) => {
+    // Formatar data para input datetime-local (YYYY-MM-DDTHH:mm)
+    const start = new Date(info.start).toISOString().slice(0, 16);
+    const end = new Date(info.end).toISOString().slice(0, 16);
+
     setNewBooking({
       ...newBooking,
-      start: info.startStr,
-      end: info.endStr,
+      start: start,
+      end: end,
+      roomId: rooms.length > 0 ? rooms[0].id.toString() : ''
+    });
+    setIsBookingModalOpen(true);
+  };
+
+  const handleManualBooking = () => {
+    const now = new Date();
+    const start = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    const end = new Date(now.getTime() - now.getTimezoneOffset() * 60000 + 3600000).toISOString().slice(0, 16);
+    
+    setNewBooking({
+      title: '',
+      start: start,
+      end: end,
       roomId: rooms.length > 0 ? rooms[0].id.toString() : ''
     });
     setIsBookingModalOpen(true);
@@ -130,8 +148,8 @@ export default function Dashboard() {
           roomId: newBooking.roomId,
           userId: currentUser.id,
           userRole: currentUser.role,
-          start: newBooking.start,
-          end: newBooking.end
+          start: new Date(newBooking.start).toISOString(),
+          end: new Date(newBooking.end).toISOString()
         });
         fetchBookings();
         setIsBookingModalOpen(false);
@@ -245,7 +263,7 @@ export default function Dashboard() {
     return (
       <div className="flex min-h-screen items-center justify-center p-4 relative overflow-hidden bg-[#0A0A0A]">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/20 blur-[120px] rounded-full pointer-events-none" />
-        <div className="glass-panel w-full max-w-md p-8 rounded-2xl relative z-10 animation-fade-in border border-white/10 shadow-2xl">
+        <div className="glass-panel w-full max-md p-8 rounded-2xl relative z-10 animation-fade-in border border-white/10 shadow-2xl">
           <div className="flex flex-col items-center mb-8">
             <div className="w-16 h-16 rounded-2xl bg-primary/20 text-primary flex items-center justify-center border border-primary/30 mb-4"><CalendarIcon size={32} /></div>
             <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60">SMGR</h1>
@@ -304,7 +322,12 @@ export default function Dashboard() {
         <div className="flex-1 p-6 md:p-10 overflow-y-auto">
           {activeTab === 'calendar' && (
             <div className="h-full flex flex-col animation-fade-in">
-              <header className="mb-8"><h2 className="text-3xl font-bold mb-2">Painel de Reservas</h2><p className="text-zinc-400">Arraste para selecionar horários. <span className="text-yellow-500">Amarelo: pendente</span>. <span className="text-green-500">Verde: aprovado</span>.</p></header>
+              <header className="mb-8 flex justify-between items-center">
+                <div><h2 className="text-3xl font-bold mb-2">Painel de Reservas</h2><p className="text-zinc-400">Selecione no calendário ou use o botão para reserva manual.</p></div>
+                <button onClick={handleManualBooking} className="flex items-center gap-2 bg-primary hover:bg-primary/80 text-primary-foreground px-6 py-2.5 rounded-lg font-medium shadow-[0_0_15px_rgba(59,130,246,0.4)]">
+                  <Plus size={18} /> Nova Reserva
+                </button>
+              </header>
               <div className="flex-1 glass-panel rounded-2xl p-6 border border-white/5 overflow-hidden shadow-2xl relative">
                 <div className="h-full w-full calendar-container">
                   <FullCalendar
@@ -315,7 +338,7 @@ export default function Dashboard() {
                     events={bookings}
                     select={handleSelectTime}
                     eventClick={(info) => {
-                       if (info.event.extendedProps.userId === currentUser.id || currentUser.role === 'ADMIN') {
+                       if (info.event.extendedProps.user_id === currentUser.id || currentUser.role === 'ADMIN') {
                          handleDeleteBooking(info.event.id);
                        }
                     }}
@@ -399,7 +422,18 @@ export default function Dashboard() {
             <form onSubmit={handleSaveBooking} className="space-y-4">
               <div><label className="block text-sm font-medium text-zinc-300 mb-1">Título/Finalidade</label><input type="text" required value={newBooking.title} onChange={e => setNewBooking({...newBooking, title: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-primary/50" placeholder="ex: Reunião de Equipe" /></div>
               <div><label className="block text-sm font-medium text-zinc-300 mb-1">Selecione a Sala</label><select required value={newBooking.roomId} onChange={e => setNewBooking({...newBooking, roomId: e.target.value})} className="w-full bg-[#1A1A1A] border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-primary/50 appearance-none"><option value="">Selecione uma sala...</option>{rooms.map(room => (<option key={room.id} value={room.id}>{room.name} ({room.capacity} pessoas)</option>))}</select></div>
-              <div className="grid grid-cols-2 gap-4"><div><label className="block text-sm font-medium text-zinc-300 mb-1">Início</label><div className="px-4 py-2 bg-white/5 rounded-lg border border-white/10 text-zinc-400 text-xs">{new Date(newBooking.start).toLocaleString('pt-br')}</div></div><div><label className="block text-sm font-medium text-zinc-300 mb-1">Fim</label><div className="px-4 py-2 bg-white/5 rounded-lg border border-white/10 text-zinc-400 text-xs">{new Date(newBooking.end).toLocaleString('pt-br')}</div></div></div>
+              
+              <div className="grid grid-cols-1 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-zinc-300 mb-1">Data e Hora de Início</label>
+                  <input type="datetime-local" required value={newBooking.start} onChange={e => setNewBooking({...newBooking, start: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-primary/50" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-zinc-300 mb-1">Data e Hora de Término</label>
+                  <input type="datetime-local" required value={newBooking.end} onChange={e => setNewBooking({...newBooking, end: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-primary/50" />
+                </div>
+              </div>
+
               <div className="pt-4 flex justify-end gap-3"><button type="button" onClick={() => setIsBookingModalOpen(false)} className="px-4 py-2 text-zinc-400 hover:text-white">Cancelar</button><button type="submit" className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-2 rounded-lg font-medium shadow-[0_0_15px_rgba(59,130,246,0.4)]">{currentUser.role === 'ADMIN' ? 'Confirmar Reserva' : 'Solicitar Aprovação'}</button></div>
             </form>
           </div>
@@ -449,6 +483,13 @@ export default function Dashboard() {
         .fc-timegrid-slot-label-cushion { color: #a1a1aa; }
         .animation-fade-in { animation: fadeIn 0.4s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Custom styling for datetime-local to match theme */
+        input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+          filter: invert(1);
+          opacity: 0.5;
+          cursor: pointer;
+        }
       `}} />
     </div>
   );
