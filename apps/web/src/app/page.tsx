@@ -5,19 +5,23 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import { LogOut, Calendar as CalendarIcon, Settings, Users, Home, X, Plus, Trash2, Edit2, CheckCircle, Clock, Ban, History } from 'lucide-react';
+import { LogOut, Calendar as CalendarIcon, Settings, Users, Home, X, Plus, Trash2, Edit2, CheckCircle, Clock, Ban, History, ShieldAlert } from 'lucide-react';
 import axios from 'axios';
 
 const API_URL = 'http://localhost:3001';
 
 export default function Dashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isConfigured, setIsConfigured] = useState(true);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [activeTab, setActiveTab] = useState('calendar');
   
   // Login State
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+
+  // Setup State
+  const [setupData, setSetupData] = useState({ name: '', username: '', password: '' });
 
   // Modals State
   const [isRoomModalOpen, setIsRoomModalOpen] = useState(false);
@@ -35,6 +39,24 @@ export default function Dashboard() {
   const [newRoom, setNewRoom] = useState({ name: '', cap: '', res: '' });
   const [newUser, setNewUser] = useState({ name: '', username: '', role: 'USER', password: '' });
   const [newBooking, setNewBooking] = useState({ title: '', roomId: '', start: '', end: '' });
+
+  // Check configuration on load
+  useEffect(() => {
+    checkConfiguration();
+  }, []);
+
+  const checkConfiguration = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/users/count`);
+      if (response.data.count === 0) {
+        setIsConfigured(false);
+      } else {
+        setIsConfigured(true);
+      }
+    } catch (error) {
+      console.error('Erro ao verificar configuração:', error);
+    }
+  };
 
   // Fetch initial data
   useEffect(() => {
@@ -90,7 +112,7 @@ export default function Dashboard() {
           end: b.end_time,
           backgroundColor: bgColor,
           borderColor: borderColor,
-          display: b.status === 'REJECTED' ? 'none' : 'auto', // Don't show rejected in calendar
+          display: b.status === 'REJECTED' ? 'none' : 'auto',
           extendedProps: { ...b }
         };
       });
@@ -112,6 +134,20 @@ export default function Dashboard() {
       setActiveTab('calendar');
     } catch (error) {
       alert('Usuário ou senha inválidos!');
+    }
+  };
+
+  const handleSetup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await axios.post(`${API_URL}/users`, {
+        ...setupData,
+        role: 'ADMIN'
+      });
+      setIsConfigured(true);
+      alert('Administrador configurado com sucesso! Agora você pode logar.');
+    } catch (error) {
+      alert('Erro ao configurar administrador.');
     }
   };
 
@@ -262,6 +298,29 @@ export default function Dashboard() {
     }
   };
 
+  // Primeira Configuração
+  if (!isConfigured) {
+    return (
+      <div className="flex min-h-screen items-center justify-center p-4 relative overflow-hidden bg-[#0A0A0A]">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/20 blur-[120px] rounded-full pointer-events-none" />
+        <div className="glass-panel w-full max-w-sm p-8 rounded-3xl relative z-10 animation-fade-in border border-primary/20 shadow-2xl">
+          <div className="flex flex-col items-center mb-10 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-primary/20 text-primary flex items-center justify-center border border-primary/30 shadow-[0_0_20px_rgba(59,130,246,0.3)] mb-4"><ShieldAlert size={32} /></div>
+            <h1 className="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60 tracking-tight">Primeira Configuração</h1>
+            <p className="text-zinc-500 mt-2 text-xs font-medium">Cadastre o primeiro administrador do sistema.</p>
+          </div>
+          <form onSubmit={handleSetup} className="space-y-4">
+            <div><label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Nome Completo</label><input type="text" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary/50" placeholder="ex: João Silva" required value={setupData.name} onChange={e => setSetupData({...setupData, name: e.target.value})} /></div>
+            <div><label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Usuário</label><input type="text" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary/50" placeholder="admin" required value={setupData.username} onChange={e => setSetupData({...setupData, username: e.target.value})} /></div>
+            <div><label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Senha</label><input type="password" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary/50" placeholder="••••••••" required value={setupData.password} onChange={e => setSetupData({...setupData, password: e.target.value})} /></div>
+            <button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl px-4 py-4 mt-4 transition-all shadow-[0_0_20px_rgba(59,130,246,0.4)]">Finalizar Configuração</button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
+  // Tela de Login
   if (!isAuthenticated) {
     return (
       <div className="flex min-h-screen items-center justify-center p-4 relative overflow-hidden bg-[#0A0A0A]">
@@ -273,9 +332,9 @@ export default function Dashboard() {
             <p className="text-zinc-500 mt-2 text-xs font-medium uppercase tracking-widest">Acesso ao Sistema</p>
           </div>
           <form onSubmit={handleLogin} className="space-y-5">
-            <div><label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 ml-1">Usuário</label><input type="text" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all placeholder:text-zinc-700" placeholder="admin" value={username} onChange={(e) => setUsername(e.target.value)} required /></div>
-            <div><label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 ml-1">Senha</label><input type="password" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all placeholder:text-zinc-700" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required /></div>
-            <button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl px-4 py-4 mt-4 transition-all shadow-[0_0_20px_rgba(59,130,246,0.4)] hover:shadow-[0_0_30px_rgba(59,130,246,0.6)] active:scale-[0.98]">Entrar</button>
+            <div><label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 ml-1">Usuário</label><input type="text" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-white focus:outline-none focus:border-primary/50" placeholder="Digite seu usuário" value={username} onChange={(e) => setUsername(e.target.value)} required /></div>
+            <div><label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 ml-1">Senha</label><input type="password" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-white focus:outline-none focus:border-primary/50" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required /></div>
+            <button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl px-4 py-4 mt-4 transition-all shadow-[0_0_20px_rgba(59,130,246,0.4)] active:scale-[0.98]">Entrar</button>
           </form>
         </div>
       </div>
