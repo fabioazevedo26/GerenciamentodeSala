@@ -112,4 +112,4 @@ npm run dev
 ```
 
 ---
-Desenvolvido com ❤️ por **Fabio**.
+Desenvolvido por **Fabio**.
