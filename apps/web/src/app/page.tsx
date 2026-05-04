@@ -5,7 +5,7 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import { LogOut, Calendar as CalendarIcon, Settings, Users, Home, X, Plus, Trash2, Edit2, CheckCircle, Clock, Ban } from 'lucide-react';
+import { LogOut, Calendar as CalendarIcon, Settings, Users, Home, X, Plus, Trash2, Edit2, CheckCircle, Clock, Ban, History } from 'lucide-react';
 import axios from 'axios';
 
 const API_URL = 'http://localhost:3001';
@@ -78,6 +78,9 @@ export default function Dashboard() {
         } else if (b.status === 'APPROVED') {
           bgColor = b.user_id === currentUser?.id ? 'rgba(59, 130, 246, 0.2)' : 'rgba(34, 197, 94, 0.2)';
           borderColor = b.user_id === currentUser?.id ? 'rgb(59, 130, 246)' : 'rgb(34, 197, 94)';
+        } else if (b.status === 'REJECTED') {
+          bgColor = 'rgba(239, 68, 68, 0.1)';
+          borderColor = 'rgba(239, 68, 68, 0.3)';
         }
 
         return {
@@ -87,6 +90,7 @@ export default function Dashboard() {
           end: b.end_time,
           backgroundColor: bgColor,
           borderColor: borderColor,
+          display: b.status === 'REJECTED' ? 'none' : 'auto', // Don't show rejected in calendar
           extendedProps: { ...b }
         };
       });
@@ -172,7 +176,7 @@ export default function Dashboard() {
   };
 
   const handleDeleteBooking = async (id: string) => {
-    if (confirm('Deseja excluir esta reserva?')) {
+    if (confirm('Deseja excluir esta reserva definitivamente?')) {
       try {
         await axios.delete(`${API_URL}/bookings/${id}`);
         fetchBookings();
@@ -261,47 +265,17 @@ export default function Dashboard() {
   if (!isAuthenticated) {
     return (
       <div className="flex min-h-screen items-center justify-center p-4 relative overflow-hidden bg-[#0A0A0A]">
-        {/* Glow effect */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/20 blur-[120px] rounded-full pointer-events-none" />
-        
         <div className="glass-panel w-full max-w-sm p-8 rounded-3xl relative z-10 animation-fade-in border border-white/10 shadow-2xl">
           <div className="flex flex-col items-center mb-10">
-            <div className="w-16 h-16 rounded-2xl bg-primary/20 text-primary flex items-center justify-center border border-primary/30 shadow-[0_0_20px_rgba(59,130,246,0.3)] mb-4">
-              <CalendarIcon size={32} />
-            </div>
+            <div className="w-16 h-16 rounded-2xl bg-primary/20 text-primary flex items-center justify-center border border-primary/30 shadow-[0_0_20px_rgba(59,130,246,0.3)] mb-4"><CalendarIcon size={32} /></div>
             <h1 className="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60 tracking-tight">SMGR</h1>
             <p className="text-zinc-500 mt-2 text-xs font-medium uppercase tracking-widest">Acesso ao Sistema</p>
           </div>
-
           <form onSubmit={handleLogin} className="space-y-5">
-            <div>
-              <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 ml-1">Usuário</label>
-              <input 
-                type="text" 
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all placeholder:text-zinc-700"
-                placeholder="admin"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 ml-1">Senha</label>
-              <input 
-                type="password" 
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all placeholder:text-zinc-700"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-            <button 
-              type="submit" 
-              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl px-4 py-4 mt-4 transition-all shadow-[0_0_20px_rgba(59,130,246,0.4)] hover:shadow-[0_0_30px_rgba(59,130,246,0.6)] active:scale-[0.98]"
-            >
-              Entrar
-            </button>
+            <div><label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 ml-1">Usuário</label><input type="text" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all placeholder:text-zinc-700" placeholder="admin" value={username} onChange={(e) => setUsername(e.target.value)} required /></div>
+            <div><label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 ml-1">Senha</label><input type="password" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all placeholder:text-zinc-700" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required /></div>
+            <button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl px-4 py-4 mt-4 transition-all shadow-[0_0_20px_rgba(59,130,246,0.4)] hover:shadow-[0_0_30px_rgba(59,130,246,0.6)] active:scale-[0.98]">Entrar</button>
           </form>
         </div>
       </div>
@@ -324,6 +298,9 @@ export default function Dashboard() {
               <>
                 <button onClick={() => setActiveTab('approvals')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${activeTab === 'approvals' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-zinc-400 hover:text-white hover:bg-white/5'}`}>
                   <CheckCircle size={18} /><span className="font-medium">Aprovações</span>
+                </button>
+                <button onClick={() => setActiveTab('history')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${activeTab === 'history' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-zinc-400 hover:text-white hover:bg-white/5'}`}>
+                  <History size={18} /><span className="font-medium">Histórico</span>
                 </button>
                 <button onClick={() => setActiveTab('rooms')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${activeTab === 'rooms' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-zinc-400 hover:text-white hover:bg-white/5'}`}>
                   <Settings size={18} /><span className="font-medium">Salas</span>
@@ -353,9 +330,7 @@ export default function Dashboard() {
             <div className="h-full flex flex-col animation-fade-in">
               <header className="mb-8 flex justify-between items-center">
                 <div><h2 className="text-3xl font-bold mb-2">Painel de Reservas</h2><p className="text-zinc-400">Selecione no calendário ou use o botão para reserva manual.</p></div>
-                <button onClick={handleManualBooking} className="flex items-center gap-2 bg-primary hover:bg-primary/80 text-primary-foreground px-6 py-2.5 rounded-lg font-medium shadow-[0_0_15px_rgba(59,130,246,0.4)]">
-                  <Plus size={18} /> Nova Reserva
-                </button>
+                <button onClick={handleManualBooking} className="flex items-center gap-2 bg-primary hover:bg-primary/80 text-primary-foreground px-6 py-2.5 rounded-lg font-medium shadow-[0_0_15px_rgba(59,130,246,0.4)]"><Plus size={18} /> Nova Reserva</button>
               </header>
               <div className="flex-1 glass-panel rounded-2xl p-6 border border-white/5 overflow-hidden shadow-2xl relative">
                 <div className="h-full w-full calendar-container">
@@ -401,6 +376,46 @@ export default function Dashboard() {
                     </div>
                   </div>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {(activeTab === 'history' && currentUser?.role === 'ADMIN') && (
+            <div className="h-full animation-fade-in">
+              <header className="mb-8"><h2 className="text-3xl font-bold mb-2">Histórico de Reservas</h2><p className="text-zinc-400">Registro completo de todas as atividades do sistema.</p></header>
+              <div className="glass-panel rounded-2xl overflow-hidden border border-white/5">
+                <table className="w-full text-left">
+                  <thead className="bg-white/5 border-b border-white/5">
+                    <tr>
+                      <th className="p-4 font-medium text-zinc-400 text-xs uppercase tracking-wider">Data</th>
+                      <th className="p-4 font-medium text-zinc-400 text-xs uppercase tracking-wider">Horário</th>
+                      <th className="p-4 font-medium text-zinc-400 text-xs uppercase tracking-wider">Sala</th>
+                      <th className="p-4 font-medium text-zinc-400 text-xs uppercase tracking-wider">Usuário</th>
+                      <th className="p-4 font-medium text-zinc-400 text-xs uppercase tracking-wider">Finalidade</th>
+                      <th className="p-4 font-medium text-zinc-400 text-xs uppercase tracking-wider">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {bookings.map(b => (
+                      <tr key={b.id} className="border-b border-white/5 group hover:bg-white/5 transition-colors">
+                        <td className="p-4 text-sm">{new Date(b.start).toLocaleDateString('pt-br')}</td>
+                        <td className="p-4 text-sm">{new Date(b.start).toLocaleTimeString('pt-br', {hour: '2-digit', minute:'2-digit'})} - {new Date(b.end).toLocaleTimeString('pt-br', {hour: '2-digit', minute:'2-digit'})}</td>
+                        <td className="p-4 text-sm font-bold">{b.extendedProps.room.name}</td>
+                        <td className="p-4 text-sm">{b.extendedProps.user.name}</td>
+                        <td className="p-4 text-sm text-zinc-400">{b.extendedProps.title}</td>
+                        <td className="p-4">
+                          <span className={`px-2 py-1 rounded text-[10px] font-black border ${
+                            b.extendedProps.status === 'APPROVED' ? 'bg-green-500/10 text-green-500 border-green-500/20' : 
+                            b.extendedProps.status === 'PENDING' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' : 
+                            'bg-red-500/10 text-red-500 border-red-500/20'
+                          }`}>
+                            {b.extendedProps.status === 'APPROVED' ? 'APROVADO' : b.extendedProps.status === 'PENDING' ? 'PENDENTE' : 'REJEITADO'}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           )}
