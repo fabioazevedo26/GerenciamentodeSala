@@ -112,7 +112,6 @@ export default function Dashboard() {
   };
 
   const handleSelectTime = (info: any) => {
-    // Formatar data para input datetime-local (YYYY-MM-DDTHH:mm)
     const start = new Date(info.start).toISOString().slice(0, 16);
     const end = new Date(info.end).toISOString().slice(0, 16);
 
@@ -262,17 +261,47 @@ export default function Dashboard() {
   if (!isAuthenticated) {
     return (
       <div className="flex min-h-screen items-center justify-center p-4 relative overflow-hidden bg-[#0A0A0A]">
+        {/* Glow effect */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/20 blur-[120px] rounded-full pointer-events-none" />
-        <div className="glass-panel w-full max-md p-8 rounded-2xl relative z-10 animation-fade-in border border-white/10 shadow-2xl">
-          <div className="flex flex-col items-center mb-8">
-            <div className="w-16 h-16 rounded-2xl bg-primary/20 text-primary flex items-center justify-center border border-primary/30 mb-4"><CalendarIcon size={32} /></div>
-            <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60">SMGR</h1>
-            <p className="text-zinc-400 mt-2 text-sm text-center">Sistema Moderno de Gestão de Reservas</p>
+        
+        <div className="glass-panel w-full max-w-sm p-8 rounded-3xl relative z-10 animation-fade-in border border-white/10 shadow-2xl">
+          <div className="flex flex-col items-center mb-10">
+            <div className="w-16 h-16 rounded-2xl bg-primary/20 text-primary flex items-center justify-center border border-primary/30 shadow-[0_0_20px_rgba(59,130,246,0.3)] mb-4">
+              <CalendarIcon size={32} />
+            </div>
+            <h1 className="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60 tracking-tight">SMGR</h1>
+            <p className="text-zinc-500 mt-2 text-xs font-medium uppercase tracking-widest">Acesso ao Sistema</p>
           </div>
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div><label className="block text-sm font-medium text-zinc-300 mb-1">Usuário</label><input type="text" className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary/50" placeholder="admin" value={username} onChange={(e) => setUsername(e.target.value)} required /></div>
-            <div><label className="block text-sm font-medium text-zinc-300 mb-1">Senha</label><input type="password" className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary/50" placeholder="admin" value={password} onChange={(e) => setPassword(e.target.value)} required /></div>
-            <button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-lg px-4 py-3 mt-4 transition-all shadow-[0_0_15px_rgba(59,130,246,0.4)]">Entrar no Sistema</button>
+
+          <form onSubmit={handleLogin} className="space-y-5">
+            <div>
+              <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 ml-1">Usuário</label>
+              <input 
+                type="text" 
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all placeholder:text-zinc-700"
+                placeholder="admin"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 ml-1">Senha</label>
+              <input 
+                type="password" 
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all placeholder:text-zinc-700"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            <button 
+              type="submit" 
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl px-4 py-4 mt-4 transition-all shadow-[0_0_20px_rgba(59,130,246,0.4)] hover:shadow-[0_0_30px_rgba(59,130,246,0.6)] active:scale-[0.98]"
+            >
+              Entrar
+            </button>
           </form>
         </div>
       </div>
@@ -422,18 +451,10 @@ export default function Dashboard() {
             <form onSubmit={handleSaveBooking} className="space-y-4">
               <div><label className="block text-sm font-medium text-zinc-300 mb-1">Título/Finalidade</label><input type="text" required value={newBooking.title} onChange={e => setNewBooking({...newBooking, title: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-primary/50" placeholder="ex: Reunião de Equipe" /></div>
               <div><label className="block text-sm font-medium text-zinc-300 mb-1">Selecione a Sala</label><select required value={newBooking.roomId} onChange={e => setNewBooking({...newBooking, roomId: e.target.value})} className="w-full bg-[#1A1A1A] border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-primary/50 appearance-none"><option value="">Selecione uma sala...</option>{rooms.map(room => (<option key={room.id} value={room.id}>{room.name} ({room.capacity} pessoas)</option>))}</select></div>
-              
               <div className="grid grid-cols-1 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-zinc-300 mb-1">Data e Hora de Início</label>
-                  <input type="datetime-local" required value={newBooking.start} onChange={e => setNewBooking({...newBooking, start: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-primary/50" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-zinc-300 mb-1">Data e Hora de Término</label>
-                  <input type="datetime-local" required value={newBooking.end} onChange={e => setNewBooking({...newBooking, end: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-primary/50" />
-                </div>
+                <div><label className="block text-sm font-medium text-zinc-300 mb-1">Início</label><input type="datetime-local" required value={newBooking.start} onChange={e => setNewBooking({...newBooking, start: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-primary/50" /></div>
+                <div><label className="block text-sm font-medium text-zinc-300 mb-1">Fim</label><input type="datetime-local" required value={newBooking.end} onChange={e => setNewBooking({...newBooking, end: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-primary/50" /></div>
               </div>
-
               <div className="pt-4 flex justify-end gap-3"><button type="button" onClick={() => setIsBookingModalOpen(false)} className="px-4 py-2 text-zinc-400 hover:text-white">Cancelar</button><button type="submit" className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-2 rounded-lg font-medium shadow-[0_0_15px_rgba(59,130,246,0.4)]">{currentUser.role === 'ADMIN' ? 'Confirmar Reserva' : 'Solicitar Aprovação'}</button></div>
             </form>
           </div>
@@ -483,13 +504,7 @@ export default function Dashboard() {
         .fc-timegrid-slot-label-cushion { color: #a1a1aa; }
         .animation-fade-in { animation: fadeIn 0.4s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        /* Custom styling for datetime-local to match theme */
-        input[type="datetime-local"]::-webkit-calendar-picker-indicator {
-          filter: invert(1);
-          opacity: 0.5;
-          cursor: pointer;
-        }
+        input[type="datetime-local"]::-webkit-calendar-picker-indicator { filter: invert(1); opacity: 0.5; cursor: pointer; }
       `}} />
     </div>
   );
