@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put, BadRequestException } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
 
 @Controller('bookings')
@@ -20,13 +20,21 @@ export class BookingController {
 
   @Post()
   async create(@Body() data: any) {
+    const startTime = new Date(data.start);
+    const now = new Date();
+
+    // Validação para impedir reservas em datas passadas
+    if (startTime < now) {
+      throw new BadRequestException('Não é possível realizar reservas em datas ou horários que já passaram.');
+    }
+
     // Se o usuário for ADMIN, já cria como APPROVED, senão PENDING
     const status = data.userRole === 'ADMIN' ? 'APPROVED' : 'PENDING';
     
     return this.prisma.booking.create({
       data: {
         title: data.title,
-        start_time: new Date(data.start),
+        start_time: startTime,
         end_time: new Date(data.end),
         status: status,
         room: { connect: { id: Number(data.roomId) } },

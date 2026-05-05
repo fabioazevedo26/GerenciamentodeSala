@@ -152,8 +152,16 @@ export default function Dashboard() {
   };
 
   const handleSelectTime = (info: any) => {
-    const start = new Date(info.start).toISOString().slice(0, 16);
-    const end = new Date(info.end).toISOString().slice(0, 16);
+    const selectedStart = new Date(info.start);
+    const now = new Date();
+
+    if (selectedStart < now) {
+      alert('Não é possível selecionar horários que já passaram.');
+      return;
+    }
+
+    const start = new Date(selectedStart.getTime() - selectedStart.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    const end = new Date(new Date(info.end).getTime() - new Date(info.end).getTimezoneOffset() * 60000).toISOString().slice(0, 16);
 
     setNewBooking({
       ...newBooking,
@@ -181,6 +189,14 @@ export default function Dashboard() {
   const handleSaveBooking = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newBooking.title && newBooking.roomId) {
+      const startTime = new Date(newBooking.start);
+      const now = new Date();
+
+      if (startTime < now) {
+        alert('Não é possível realizar reservas em datas ou horários que já passaram.');
+        return;
+      }
+
       try {
         await axios.post(`${API_URL}/bookings`, {
           title: newBooking.title,
@@ -196,8 +212,9 @@ export default function Dashboard() {
         if (currentUser.role !== 'ADMIN') {
           alert('Reserva solicitada! Aguarde a aprovação de um administrador.');
         }
-      } catch (error) {
-        alert('Erro ao realizar reserva.');
+      } catch (error: any) {
+        const message = error.response?.data?.message || 'Erro ao realizar reserva.';
+        alert(message);
       }
     }
   };
