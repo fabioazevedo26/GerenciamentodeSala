@@ -51,7 +51,7 @@ O **SMGR** é uma plataforma de gerenciamento de salas e recursos on-premises, f
 Siga estas instruções para rodar o SMGR do zero no seu computador:
 
 ### 1. Pré-requisitos
-- [Node.js](https://nodejs.org/) (v18 ou superior)
+- [Node.js](https://nodejs.org/) (v20 ou superior)
 - [Docker Desktop](https://www.docker.com/) instalado e rodando.
 
 ### 2. Clonar e Instalar
